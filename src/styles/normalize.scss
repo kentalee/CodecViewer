@@ -1,0 +1,77 @@
+@import '~normalize.css/normalize.css';
+@import '~fonts.css/dist/fonts.scss';
+
+html, body, h1, h2, h3, h4, h5, h6, p {
+	font-size: 14px;
+	font-weight: normal;
+	@include font-hei;
+}
+
+html, body, div, h1, h2, h3, h4, h5, h6, ul, ol, dl, li, dt, dd, p, blockquote,
+pre, form, fieldset, table, th, td {
+	border: none;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html, body {
+	height: 100%;
+	width: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+.full-page {
+	min-height: 100vh;
+}
+
+.full-width {
+	width: 100% !important;
+}
+
+.float-left {
+	float: left;
+}
+
+.float-right {
+	float: right;
+}
+
+.float-clear:after {
+	content: ".";
+	visibility: hidden;
+	display: block;
+	height: 0;
+	clear: both;
+}
+
+.text-left {
+	text-align: left;
+}
+
+.text-right {
+	text-align: right;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.no-margin {
+	margin: 0;
+}
+
+.no-margin-bottom {
+	margin-bottom: 0;
+}
+
+.no-margin-top {
+	margin-top: 0;
+}
+
+.inline-block {
+	display: inline-block;
+}
