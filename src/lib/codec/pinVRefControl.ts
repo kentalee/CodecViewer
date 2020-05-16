@@ -1,6 +1,6 @@
 import { NodeType } from '@/lib/codec/nodeType';
 import { getBitRange, setBitRange } from '@/lib/codec/utils';
-import PinCap from '@/lib/codec/pinCap';
+import { PinCap } from '@/lib/codec/pinCap';
 
 export default class PinVRefControl {
 	private readonly parent: PinCap | undefined;
