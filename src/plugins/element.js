@@ -8,6 +8,8 @@ import {
 	Card,
 	Checkbox,
 	Col,
+	Collapse,
+	CollapseItem,
 	DatePicker,
 	Dialog,
 	Divider,
@@ -55,6 +57,8 @@ Vue.use(Tooltip);
 
 Vue.use(Row);
 Vue.use(Col);
+Vue.use(Collapse);
+Vue.use(CollapseItem);
 Vue.use(Card);
 Vue.use(Table);
 Vue.use(TableColumn);

@@ -4,7 +4,7 @@ import router from './router';
 
 import '@/styles/normalize.scss';
 
-// import '@/plugins/element.js';
+import '@/plugins/element.js';
 
 Vue.config.productionTip = false;
 

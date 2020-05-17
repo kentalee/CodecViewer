@@ -1,5 +1,5 @@
 import { PinColor } from '@/lib/codec/pinColor';
-import { getBitRange, setBitRange } from '@/lib/codec/utils';
+import { getBitRange, numFixLength, setBitRange } from '@/lib/codec/utils';
 import { PinDevice } from '@/lib/codec/pinDevice';
 import { PinConnection } from '@/lib/codec/pinConnection';
 import { PinLocation } from '@/lib/codec/pinLocation';
@@ -93,13 +93,30 @@ export class PinDefault {
 
 	rawData(): number {
 		let rawNumber = 0;
-		rawNumber = setBitRange(rawNumber, 4, 0, this._sequence);
-		rawNumber = setBitRange(rawNumber, 4, 4, this._association);
-		rawNumber = setBitRange(rawNumber, 4, 8, this._misc.rawData());
-		rawNumber = setBitRange(rawNumber, 4, 12, this._color.rawData());
-		rawNumber = setBitRange(rawNumber, 4, 16, this._connection.rawData());
+		rawNumber = setBitRange(rawNumber, 2, 30, this._connectivity.rawData());
+		console.log(rawNumber.toString(2), this._connectivity.rawData());
+		rawNumber = setBitRange(rawNumber, 6, 24, this._location.rawData());
+		console.log(rawNumber.toString(2), this._location.rawData());
 		rawNumber = setBitRange(rawNumber, 4, 20, this._device.rawData());
-		rawNumber = setBitRange(rawNumber, 4, 24, this._location.rawData());
+		console.log(rawNumber.toString(2), this._device.rawData());
+		rawNumber = setBitRange(rawNumber, 4, 16, this._connection.rawData());
+		rawNumber = setBitRange(rawNumber, 4, 12, this._color.rawData());
+		rawNumber = setBitRange(rawNumber, 4, 8, this._misc.rawData());
+		rawNumber = setBitRange(rawNumber, 4, 4, this._association);
+		rawNumber = setBitRange(rawNumber, 4, 0, this._sequence);
 		return rawNumber;
+	}
+
+	rawBinaryText(space = false): string {
+		return Array.from([
+			[this._connectivity.rawData(), 2],
+			[this._location.rawData(), 6],
+			[this._device.rawData(), 4],
+			[this._connection.rawData(), 4],
+			[this._color.rawData(), 4],
+			[this._misc.rawData(), 4],
+			[this._association, 4],
+			[this._sequence, 4],
+		], part => numFixLength(part[0], 2, part[1])).join(space ? '\x20' : '');
 	}
 }

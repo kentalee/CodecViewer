@@ -1,71 +1,108 @@
 <template lang="pug">
 	div.page
 		#dropZone(
+			v-if='typeof dataTree !== "object"',
 			:class='{dragging:dragging}',
 			@dragover='dragOver', @dragleave='dragLeave', @drop.prevent='dragDrop')
 			div.center()
 				h1 Drop Codec# file here
-		#dataTables(v-if='typeof dataTree === "object"')
-			table
-				tr
-					th codec
-					th address
-					th vendor(dev_id)
-					th subsystem
-					th revision
-				tr
-					td {{dataTree.codec}}
-					td 0x{{numFixLength(dataTree.address,16,2)}}
-					td 0x{{numFixLength(dataTree.vendor,16,8)}}
-					td 0x{{numFixLength(dataTree.subsystem,16,8)}}
-					td 0x{{numFixLength(dataTree.revision,16,8)}}
-			table
-				tr
-					th NodeId
-					th Type
-					th CapInfo
-					th Association
-					th Sequence
-					th Color
-					th Device
-					th Connection
-					th Connectivity
-					th Location
-					th Misc
-				tr(v-for="node of dataTree.nodes")
-					td {{numFixLength(node.id(),10,2)}} 0x{{numFixLength(node.id(),16,2)}}
-					td {{node.widgetCap().type().text()}}
-					td
-						| {{node.widgetCap().inAmpPresent()?'AmpIn':''}}
-						| {{node.widgetCap().outAmpPresent()?'AmpOut':''}}
-						| {{node.widgetCap().stereo()?'Stereo':''}}
-					template(v-if="node.pinDefault() === undefined")
-						td(colspan="8") -
-					template(v-else)
-						td
-							| {{numFixLength(node.pinDefault().association(),10,2)}}
-							| 0x{{numFixLength(node.pinDefault().association(),16,1)}}
-						td
-							| {{numFixLength(node.pinDefault().sequence(),10,2)}}
-							| 0x{{numFixLength(node.pinDefault().sequence(),16,1)}}
-						td {{node.pinDefault().color().text()}}
-						td {{node.pinDefault().device().text()}}
-						td {{node.pinDefault().connection().text()}}
-						td
-							| {{node.pinDefault().connectivity().internal()?'internal':''}}
-							| {{node.pinDefault().connectivity().physical()?'physical':''}}
-						td {{node.pinDefault().location().texts().join(', ')}}
-						td
-							| {{node.pinDefault().misc().detectOverride()?'Detect':''}}
-							| {{node.pinCap().getEAPDCapable()?'EAPD':''}}
+		#dataTables(v-else)
+			el-table.full-width(:data='[dataTree]', border)
+				el-table-column(label='codec')
+					template(slot-scope='scope')
+						| {{dataTree.codec}}
+				el-table-column(label='address')
+					template(slot-scope='scope')
+						| 0x{{numFixLength(dataTree.address,16,2)}}
+				el-table-column(label='vendor(dev_id)')
+					template(slot-scope='scope')
+						| 0x{{numFixLength(dataTree.vendor,16,8)}}
+				el-table-column(label='subsystem')
+					template(slot-scope='scope')
+						| 0x{{numFixLength(dataTree.subsystem,16,8)}}
+				el-table-column(label='revision')
+					template(slot-scope='scope')
+						| 0x{{numFixLength(dataTree.revision,16,8)}}
+			br
+			el-table.full-width(:data='dataTree.nodes', border)
+				el-table-column(type='expand')
+					template(slot-scope='props')
+						el-collapse(
+							:value='["pinDefault"]'
+							v-if='props.row.pinDefault() !== undefined')
+							el-collapse-item(name='pinDefault')
+								template(slot='title')
+									h3.expandSectionTitle
+										| PinDefault =&nbsp;
+										code
+											| 0x{{numFixLength(props.row.pinDefault().rawData(),16,8)}}
+								el-row.expandSection(:gutter='20')
+									el-col.field(:span='16', :xs='24')
+										h4 Binary Data
+										code
+											| {{props.row.pinDefault().rawBinaryText(true)}}
+									el-col.field(:span='8', :xs='24')
+										h4 Connectivity
+										code
+											| {{props.row.pinDefault().connectivity().physical()?'physical':''}}
+											| {{props.row.pinDefault().connectivity().internal()?'internal':''}}
+											| {{props.row.pinDefault().connectivity().none()?'none':''}}
+									el-col.field(:span='8', :xs='24')
+										h4 Sequence
+										code
+											| {{numFixLength(props.row.pinDefault().sequence(),10,2)}}&nbsp;
+											| 0x{{numFixLength(props.row.pinDefault().sequence(),16,1)}}
+									el-col.field(:span='8', :xs='24')
+										h4 Association
+										code
+											| {{numFixLength(props.row.pinDefault().association(),10,2)}}&nbsp;
+											| 0x{{numFixLength(props.row.pinDefault().association(),16,1)}}
+									el-col.field(:span='8', :xs='24')
+										h4 Misc
+										code
+											| Jack Detection:
+											| {{props.row.pinDefault().misc().detectOverride()?'enabled':'disabled'}}
+									el-col.field(:span='8', :xs='24')
+										h4 Color
+										code
+											span.colorSign(:style='{backgroundColor:colorHex(props.row.pinDefault().color())}') &#12288;
+											| {{props.row.pinDefault().color().text()}}
+									el-col.field(:span='8', :xs='24')
+										h4 Connection
+										code
+											| {{props.row.pinDefault().connection().text()}}
+									el-col.field(:span='8', :xs='24')
+										h4 Device & Location
+										code
+											| {{props.row.pinDefault().device().text()}},
+											| {{props.row.pinDefault().location().texts().join(' at ')}}
+				el-table-column(label='NodeId')
+					template(slot-scope='scope')
+						| {{numFixLength(scope.row.id(),10,2)}}
+						| 0x{{numFixLength(scope.row.id(),16,2)}}
+				el-table-column(label='Type')
+					template(slot-scope='scope')
+						| {{scope.row.widgetCap().type().text()}}
 </template>
 <script lang="ts">
 	import vue from 'vue';
 	import { CodecTreeIf, processCodec } from '@/lib/codec';
-	import { numFixLength, setBitRange } from '@/lib/codec/utils';
+	import { numFixLength } from '@/lib/codec/utils';
 	import { CodecNode } from '@/lib/codec/node';
 	import { NodeType, NodeTypePinComplex, NodeTypeReserved } from '@/lib/codec/nodeType';
-	import { PinConnectivity } from '@/lib/codec/pinConnectivity';
+	import {
+		PinColor,
+		PinColorBlack,
+		PinColorBlue,
+		PinColorGreen,
+		PinColorGrey,
+		PinColorOrange,
+		PinColorPink,
+		PinColorPurple,
+		PinColorRed,
+		PinColorWhite,
+		PinColorYellow,
+	} from '@/lib/codec/pinColor';
 
 	const nodeSorter = (a: CodecNode, b: CodecNode) => {
 		const typeA = a?.widgetCap()?.type() || new NodeType(NodeTypeReserved);
@@ -80,13 +117,8 @@
 		const pdB = b.pinDefault();
 		if (pdA !== undefined && pdB !== undefined) {
 			if (pdA.connectivity().rawData() !== pdB.connectivity().rawData()) {
-				const emptyConnectivity = new PinConnectivity(0).setPhysical(false).setInternal(false);
-				if (pdA.connectivity().rawData() === emptyConnectivity.rawData()) {
-					return -1;
-				}
-				if (pdB.connectivity().rawData() === emptyConnectivity.rawData()) {
-					return 1;
-				}
+				if (pdA.connectivity().none()) return 1;
+				if (pdB.connectivity().none()) return -1;
 			}
 			if (pdA.association() !== pdB.association()) {
 				return pdA.association() > pdB.association() ? 1 : -1;
@@ -145,23 +177,47 @@
 				};
 				fr.readAsText(element);
 			},
+			colorHex(c: PinColor) {
+				switch (c.symbol()) {
+					case PinColorBlack:
+						return '#000';
+					case PinColorGrey:
+						return '#666';
+					case PinColorBlue:
+						return '#0078d7';
+					case PinColorGreen:
+						return '#16c60c';
+					case PinColorRed:
+						return '#e81224';
+					case PinColorOrange:
+						return '#f7630c';
+					case PinColorYellow:
+						return '#fff100';
+					case PinColorPurple:
+						return '#886ce4';
+					case PinColorPink:
+						return '#ff69b4';
+					case PinColorWhite:
+						return '#fff';
+					default:
+						return '';
+				}
+			},
 		},
 	});
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
+	@import '~@/styles/defines.scss';
+
 	.page {
 		font-size: 16px;
 		padding: 0.5em;
-	}
-
-	h1 {
-		margin: 0;
-		font-size: 32px;
-		font-weight: 700;
+		height: 100%;
 	}
 
 	#dropZone {
 		width: 100%;
+		height: 100%;
 		border: 2px dashed gray;
 
 		&.dragging {
@@ -169,32 +225,53 @@
 		}
 
 		.center {
-			height: 150px;
-			line-height: 150px;
+			height: 100%;
 			text-align: center;
+
+			h1 {
+				margin: 0;
+				font-size: 32px;
+				font-weight: 700;
+				position: relative;
+				top: 50%;
+				transform: translateY(-50%);
+			}
 		}
 	}
 
 	#dataTables {
 		width: 100%;
 
-		table {
-			border-collapse: collapse;
-			margin-top: 1em;
-			width: 100%;
+		code {
+			font-family: 'Cascadia Code PL', Menlo, Monaco, 'Courier New', monospace;
+		}
 
-			td,
-			th {
-				padding: 0.25em;
-				border: 2px #808080 solid;
+		.expandSectionTitle {
+			&,
+			& > * {
+				font-size: 1rem * (1 + 3/7) !important;
+				/*font-weight: 600 !important;*/
+			}
+		}
+
+		.expandSection {
+			h4 {
+				color: $cDark_B63;
 			}
 
-			tr > th {
-				font-weight: 400;
-			}
+			code {
+				display: block;
+				padding: 1rem * (1.5 / 7) 0.5rem 1rem * (5.5 / 7) 0;
 
-			tr > td {
-				font-family: 'Cascadia Code PL', Menlo, Monaco, 'Courier New', monospace;
+				.colorSign {
+					height: 1.15em;
+					width: 1.15em;
+					display: inline-block;
+					box-sizing: border-box;
+					border: black 1px solid;
+					vertical-align: text-bottom;
+					margin-right: 0.25em;
+				}
 			}
 		}
 	}

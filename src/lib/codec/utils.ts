@@ -4,8 +4,7 @@ export const getBitRange = (num: number, length: number, offset: number): number
 };
 
 export const setBitRange = (num: number, length: number, offset: number, value: number): number => {
-	const mask = Math.pow(2, offset - length) - 1;
-	return num | (value << offset | mask);
+	return num | value << offset;
 };
 
 export const strFixLength = (str: string, len: number, posAtStart = false, glue = ' ') => {

@@ -31,6 +31,10 @@ export class PinConnectivity {
 		return this;
 	}
 
+	none() {
+		return !this.physical() && !this.internal();
+	}
+
 	rawData(): number {
 		let rawNumber = 0;
 		rawNumber = setBitRange(rawNumber, 1, 0, (this._physical ? 0 : 1));
