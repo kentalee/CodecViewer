@@ -1,7 +1,8 @@
-import { getBitRange, setBitRange } from '@/lib/codec/utils';
+import { getBitRange, numFixLength, setBitRange } from '@/lib/codec/utils';
 import { NodeType } from '@/lib/codec/nodeType';
 
 export class NodeWidgetCap {
+	private _reserve: number;
 	private _type: NodeType;
 	private _delay: number;
 	private _chanCountExt: number;
@@ -20,6 +21,7 @@ export class NodeWidgetCap {
 	private _stereo: boolean;
 
 	constructor(rawNumber: number) {
+		this._reserve = getBitRange(rawNumber, 8, 24);
 		this._type = new NodeType(getBitRange(rawNumber, 4, 20));
 		this._delay = getBitRange(rawNumber, 4, 16);
 		this._chanCountExt = getBitRange(rawNumber, 3, 13);
@@ -36,6 +38,18 @@ export class NodeWidgetCap {
 		this._outAmpPresent = getBitRange(rawNumber, 1, 2) === 1;
 		this._inAmpPresent = getBitRange(rawNumber, 1, 1) === 1;
 		this._stereo = getBitRange(rawNumber, 1, 0) === 1;
+	}
+
+	reserve() {
+		return this._reserve;
+	}
+
+	setReserve(val: number) {
+		if (val < 0 || val > 0b11111111) {
+			throw Error('invalid reserve value');
+		}
+		this._reserve = val;
+		return this;
 	}
 
 	// Type defines the functionality of the widget node.
@@ -62,7 +76,7 @@ export class NodeWidgetCap {
 	// channels that the widget supports. The value contained in the 4 bit field is split with the 3 most
 	// significant bits contained in bits 15:13 and the least significant bit in bit 0.
 	chanCount() {
-		return (this._chanCountExt << 1) | (this.stereo() ? 1 : 0);
+		return (this._chanCountExt << 1) | ((this.stereo() ? 1 : 0) + 1);
 	}
 
 	chanCountExt() {
@@ -231,6 +245,7 @@ export class NodeWidgetCap {
 
 	rawData() {
 		let rawNumber = 0;
+		rawNumber = setBitRange(rawNumber, 8, 24, this._reserve);
 		rawNumber = setBitRange(rawNumber, 4, 20, this._type.rawData());
 		rawNumber = setBitRange(rawNumber, 4, 16, this._delay);
 		rawNumber = setBitRange(rawNumber, 3, 13, this._chanCountExt);
@@ -248,5 +263,30 @@ export class NodeWidgetCap {
 		rawNumber = setBitRange(rawNumber, 1, 1, this._inAmpPresent ? 1 : 0);
 		rawNumber = setBitRange(rawNumber, 1, 0, this._stereo ? 1 : 0);
 		return rawNumber;
+	}
+
+	rawBinaryText(space = false): string {
+		return Array.from(
+			[
+				[this._reserve, 8],
+				[this._type.rawData(), 4],
+				[this._delay, 4],
+				[this._chanCountExt, 3],
+				[this._CPCapability ? 1 : 0, 1],
+				[this._LRSwap ? 1 : 0, 1],
+				[this._powerCtrl ? 1 : 0, 1],
+				[this._digital ? 1 : 0, 1],
+				[this._connList ? 1 : 0, 1],
+				[this._unsolCapable ? 1 : 0, 1],
+				[this._procWidget ? 1 : 0, 1],
+				[this._stripe ? 1 : 0, 1],
+				[this._formatOverride ? 1 : 0, 1],
+				[this._ampParamOverride ? 1 : 0, 1],
+				[this._outAmpPresent ? 1 : 0, 1],
+				[this._inAmpPresent ? 1 : 0, 1],
+				[this._stereo ? 1 : 0, 1],
+			],
+			part => numFixLength(part[0], 2, part[1]),
+		).join(space ? '\x20' : '');
 	}
 }

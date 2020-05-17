@@ -24,53 +24,196 @@
 					template(slot-scope='scope')
 						| 0x{{numFixLength(dataTree.revision,16,8)}}
 			br
-			el-table.full-width(:data='dataTree.nodes', border)
+			el-table.full-width(
+				border,
+				:row-key='tbRowKey',
+				:expand-row-keys='nodeStatus',
+				:data='dataTree.nodes',
+			)
 				el-table-column(type='expand')
 					template(slot-scope='props')
-						el-collapse(
-							:value='["pinDefault"]'
-							v-if='props.row.pinDefault() !== undefined')
-							el-collapse-item(name='pinDefault')
+						el-collapse(v-model='sectionStatus[props.row.id()]')
+							el-collapse-item(name='widgetCap', v-if='props.row.widgetCap() !== undefined')
 								template(slot='title')
-									h3.expandSectionTitle
-										| PinDefault =&nbsp;
+									h3.expandSectionTitle WidgetCap =&nbsp;
+										code 0x{{numFixLength(props.row.widgetCap().rawData(),16,8)}}
+								el-row.expandSection(:gutter='20')
+									el-col.field(:span='18', :xs='24')
+										h4 Binary Data
 										code
-											| 0x{{numFixLength(props.row.pinDefault().rawData(),16,8)}}
+											| {{props.row.widgetCap().rawBinaryText(true)}}
+									el-col.field(:span='6', :xs='12')
+										h4 Type
+										code
+											| {{props.row.widgetCap().type().text()}}
+									el-col.field(:span='6', :xs='12')
+										h4 Node Id
+										code
+											| {{numFixLength(props.row.id(),10,2)}}
+											| 0x{{numFixLength(props.row.id(),16,1)}}
+									el-col.field(:span='6', :xs='12')
+										h4 Delay
+										code
+											| {{numFixLength(props.row.widgetCap().delay(),10,2)}}
+											| 0x{{numFixLength(props.row.widgetCap().delay(),16,1)}}
+									el-col.field(:span='6', :xs='12')
+										h4 Chan Count Ext
+										code
+											| {{numFixLength(props.row.widgetCap().chanCountExt(),10,2)}}
+											| 0x{{numFixLength(props.row.widgetCap().chanCountExt(),16,1)}}
+									el-col.field(:span='6', :xs='12')
+										h4 #Chan Count All
+										code
+											| {{props.row.widgetCap().chanCount()}}
+											| 0x{{numFixLength(props.row.widgetCap().chanCount(),16,1)}}
+									el-col.field(:span='6', :xs='12')
+										h4 Content Protection
+										code
+											| {{props.row.widgetCap().contentProtection()?'✔ Supported':'✘ Nonsupport'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Left/Right Swap
+										code
+											| {{props.row.widgetCap().LRSwap()?'✔ Enable':'✘ Disable'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Power Control
+										code
+											| {{props.row.widgetCap().powerCtrl()?'✔ Supported':'✘ Nonsupport'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Digital
+										code
+											| {{props.row.widgetCap().powerCtrl()?'✔ Supported':'✘ Nonsupport'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Connection List
+										code
+											| {{props.row.widgetCap().connList()?'✔ Presented':'✘ Not Presented'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Unsol Capable
+										code
+											| {{props.row.widgetCap().unsolCapable()?'✔ Supported':'✘ Nonsupport'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Processing Controls
+										code
+											| {{props.row.widgetCap().powerCtrl()?'✔ Supported':'✘ Nonsupport'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Stripe
+										code
+											| {{props.row.widgetCap().stripe()?'✔ Supported':'✘ Nonsupport'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Amp Param Override
+										code
+											| {{props.row.widgetCap().ampParamOverride()?'✔ Enable':'✘ Disable'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Out AmpPresent
+										code
+											| {{props.row.widgetCap().outAmpPresent()?'✔ Presented':'✘ Not Presented'}}
+									el-col.field(:span='6', :xs='12')
+										h4 In AmpPresent
+										code
+											| {{props.row.widgetCap().inAmpPresent()?'✔ Presented':'✘ Not Presented'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Stereo
+										code
+											| {{props.row.widgetCap().stereo()?'✔ Supported':'✘ Nonsupport'}}
+							el-collapse-item(name='pinCap', v-if='props.row.pinCap() !== undefined')
+								template(slot='title')
+									h3.expandSectionTitle PinCap =&nbsp;
+										code 0x{{numFixLength(props.row.pinCap().rawData(),16,8)}}
+								el-row.expandSection(:gutter='20')
+									el-col.field(:span='24', :xs='24')
+										h4 Binary Data
+										code
+											| {{props.row.pinCap().rawBinaryText(true)}}
+									el-col.field(:span='6', :xs='12')
+										h4 HighBitRate
+										code
+											| {{props.row.pinCap().supportHighBitRate()?'✔ Supported':'✘ Nonsupport'}}
+									el-col.field(:span='6', :xs='12')
+										h4 DP
+										code
+											| {{props.row.pinCap().supportDP()?'✔ Supported':'✘ Nonsupport'}}
+									el-col.field(:span='6', :xs='12')
+										h4 EAPD Capable
+										code
+											| {{props.row.pinCap().EAPDCapable()?'✔ Yes':'✘ No'}}
+									el-col.field(:span='6', :xs='12')
+										h4 VRefControl
+										code
+											| {{props.row.pinCap().VRefControl().getSupport100Percent()?'100%':''}}
+											| {{props.row.pinCap().VRefControl().getSupport80Percent()?'80%':''}}
+											| {{props.row.pinCap().VRefControl().getSupport50Percent()?'50%':''}}
+											| {{props.row.pinCap().VRefControl().getSupportGround()?'GND':''}}
+											| {{props.row.pinCap().VRefControl().getHiZ()?'Hiz':''}}
+											| {{props.row.pinCap().VRefControl().none()?'None':''}}
+									el-col.field(:span='6', :xs='12')
+										h4 HDMI
+										code
+											| {{props.row.pinCap().supportHDMI()?'✔ Supported':'✘ Nonsupport'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Balanced IO Pins
+										code
+											| {{props.row.pinCap().hasBalancedIOPins()?'✔ Exists':'✘ Not exist'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Input Capable
+										code
+											| {{props.row.pinCap().inputCapable()?'✔ Yes':'✘ No'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Output Capable
+										code
+											| {{props.row.pinCap().outputCapable()?'✔ Yes':'✘ No'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Headphone Capable
+										code
+											| {{props.row.pinCap().headphoneDriveCapable()?'✔ Yes':'✘ No'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Presence Detect Capable
+										code
+											| {{props.row.pinCap().presenceDetectCapable()?'✔ Yes':'✘ No'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Trigger Required
+										code
+											| {{props.row.pinCap().triggerRequired()?'✔ Yes':'✘ No'}}
+									el-col.field(:span='6', :xs='12')
+										h4 Impedance Sense Capable
+										code
+											| {{props.row.pinCap().impedanceSenseCapable()?'✔ Yes':'✘ No'}}
+							el-collapse-item(name='pinDefault', v-if='props.row.pinDefault() !== undefined')
+								template(slot='title')
+									h3.expandSectionTitle PinDefault =&nbsp;
+										code 0x{{numFixLength(props.row.pinDefault().rawData(),16,8)}}
 								el-row.expandSection(:gutter='20')
 									el-col.field(:span='16', :xs='24')
 										h4 Binary Data
 										code
 											| {{props.row.pinDefault().rawBinaryText(true)}}
-									el-col.field(:span='8', :xs='24')
+									el-col.field(:span='8', :xs='12')
+										h4 Connection
+										code
+											| {{props.row.pinDefault().connection().text()}}
+									el-col.field(:span='8', :xs='12')
+										h4 Sequence
+										code
+											| {{numFixLength(props.row.pinDefault().sequence(),10,2)}}&nbsp;
+											| 0x{{numFixLength(props.row.pinDefault().sequence(),16,1)}}
+									el-col.field(:span='8', :xs='12')
+										h4 Association
+										code
+											| {{numFixLength(props.row.pinDefault().association(),10,2)}}&nbsp;
+											| 0x{{numFixLength(props.row.pinDefault().association(),16,1)}}
+									el-col.field(:span='8', :xs='12')
+										h4 Misc - Jack Detection
+										code
+											| {{props.row.pinDefault().misc().detectOverride()?'✔ Enabled':'✘ Disabled'}}
+									el-col.field(:span='8', :xs='12')
+										h4 Color
+										code
+											span.colorSign(:style='{backgroundColor:colorHex(props.row.pinDefault().color())}') &#12288;
+											| {{props.row.pinDefault().color().text()}}
+									el-col.field(:span='8', :xs='12')
 										h4 Connectivity
 										code
 											| {{props.row.pinDefault().connectivity().physical()?'physical':''}}
 											| {{props.row.pinDefault().connectivity().internal()?'internal':''}}
 											| {{props.row.pinDefault().connectivity().none()?'none':''}}
-									el-col.field(:span='8', :xs='24')
-										h4 Sequence
-										code
-											| {{numFixLength(props.row.pinDefault().sequence(),10,2)}}&nbsp;
-											| 0x{{numFixLength(props.row.pinDefault().sequence(),16,1)}}
-									el-col.field(:span='8', :xs='24')
-										h4 Association
-										code
-											| {{numFixLength(props.row.pinDefault().association(),10,2)}}&nbsp;
-											| 0x{{numFixLength(props.row.pinDefault().association(),16,1)}}
-									el-col.field(:span='8', :xs='24')
-										h4 Misc
-										code
-											| Jack Detection:
-											| {{props.row.pinDefault().misc().detectOverride()?'enabled':'disabled'}}
-									el-col.field(:span='8', :xs='24')
-										h4 Color
-										code
-											span.colorSign(:style='{backgroundColor:colorHex(props.row.pinDefault().color())}') &#12288;
-											| {{props.row.pinDefault().color().text()}}
-									el-col.field(:span='8', :xs='24')
-										h4 Connection
-										code
-											| {{props.row.pinDefault().connection().text()}}
 									el-col.field(:span='8', :xs='24')
 										h4 Device & Location
 										code
@@ -134,13 +277,10 @@
 	export default vue.extend({
 		data() {
 			return {
-				optionEnableVendorWidget: false,
-				optionEnableAudioInput: false,
-				optionEnableAudioOutput: false,
-				optionEnableAudioMixer: false,
-
 				dragging: false,
 				dataTree: undefined as CodecTreeIf | undefined,
+				sectionStatus: {} as Record<number, string[]>,
+				nodeStatus: [] as number[],
 			};
 		},
 		methods: {
@@ -160,6 +300,8 @@
 				ev.preventDefault();
 				this.dragging = false;
 				this.dataTree = undefined;
+				this.sectionStatus = {};
+				this.nodeStatus = [];
 				if (ev.dataTransfer === null || ev.dataTransfer.files.length === 0) {
 					return;
 				}
@@ -169,7 +311,13 @@
 					try {
 						const dataTree = processCodec(fr.result as string);
 						dataTree.nodes = dataTree.nodes.sort(nodeSorter);
-						console.log(dataTree);
+						dataTree.nodes.forEach(node => {
+							const nodeId = node.id();
+							if (node.pinDefault() !== undefined && nodeId !== undefined) {
+								this.sectionStatus[nodeId] = ['pinDefault'];
+								this.nodeStatus.push(nodeId);
+							}
+						});
 						this.dataTree = dataTree;
 					} catch (e) {
 						console.log(e);
@@ -202,6 +350,9 @@
 					default:
 						return '';
 				}
+			},
+			tbRowKey(row: CodecNode) {
+				return row.id();
 			},
 		},
 	});

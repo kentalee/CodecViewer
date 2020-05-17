@@ -37,8 +37,8 @@ export class PinConnectivity {
 
 	rawData(): number {
 		let rawNumber = 0;
-		rawNumber = setBitRange(rawNumber, 1, 0, (this._physical ? 0 : 1));
-		rawNumber = setBitRange(rawNumber, 1, 1, (this._internal ? 1 : 0));
+		rawNumber = setBitRange(rawNumber, 1, 0, this._physical ? 0 : 1);
+		rawNumber = setBitRange(rawNumber, 1, 1, this._internal ? 1 : 0);
 		return rawNumber;
 	}
 }

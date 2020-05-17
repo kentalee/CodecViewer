@@ -12,7 +12,7 @@ export default class PinVRefControl {
 	}
 
 	getSupport100Percent(): boolean {
-		if (this.parent && !this.parent.getInputCapable()) return false;
+		if (this.parent && !this.parent.inputCapable()) return false;
 		return getBitRange(this.value, 1, 5) === 1;
 	}
 
@@ -22,7 +22,7 @@ export default class PinVRefControl {
 	}
 
 	getSupport80Percent(): boolean {
-		if (this.parent && !this.parent.getInputCapable()) return false;
+		if (this.parent && !this.parent.inputCapable()) return false;
 		return getBitRange(this.value, 1, 4) === 1;
 	}
 
@@ -32,7 +32,7 @@ export default class PinVRefControl {
 	}
 
 	getSupport50Percent(): boolean {
-		if (this.parent && !this.parent.getInputCapable()) return false;
+		if (this.parent && !this.parent.inputCapable()) return false;
 		return getBitRange(this.value, 1, 1) === 1;
 	}
 
@@ -42,7 +42,7 @@ export default class PinVRefControl {
 	}
 
 	getSupportGround(): boolean {
-		if (this.parent && !this.parent.getInputCapable()) return false;
+		if (this.parent && !this.parent.inputCapable()) return false;
 		return getBitRange(this.value, 1, 2) === 1;
 	}
 
@@ -53,9 +53,9 @@ export default class PinVRefControl {
 
 	getHiZ() {
 		if (this.parent) {
-			if (!this.parent.getInputCapable()) return false;
+			if (!this.parent.inputCapable()) return false;
 			if (
-				this.parent.getOutputCapable() &&
+				this.parent.outputCapable() &&
 				(this.getSupport50Percent() ||
 					this.getSupport80Percent() ||
 					this.getSupport100Percent() ||
@@ -69,6 +69,16 @@ export default class PinVRefControl {
 	setHiZ(val: boolean): PinVRefControl {
 		this.value = setBitRange(this.value, 1, 0, val ? 1 : 0);
 		return this;
+	}
+
+	none() {
+		return (
+			!this.getSupport100Percent() &&
+			!this.getSupport80Percent() &&
+			!this.getSupport50Percent() &&
+			!this.getSupportGround() &&
+			!this.getHiZ()
+		);
 	}
 
 	rawData(encode = false) {
