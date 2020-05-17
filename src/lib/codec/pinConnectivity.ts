@@ -1,7 +1,7 @@
 import { getBitRange, setBitRange } from '@/lib/codec/utils';
 
 export class PinConnectivity {
-	public static errInvalidValue = Error('invalid Connectivity value');
+	public static errInvalidValue = Error('invalid connectivity value');
 	private _physical: boolean;
 	private _internal: boolean;
 

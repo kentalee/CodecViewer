@@ -1,11 +1,8 @@
-export const getBitRange = (num: number, length: number, offset: number): number => {
-	const mask = Math.pow(2, length) - 1;
-	return (num & (mask << offset)) >> offset;
-};
+export const getBitRange = (num: number, length: number, offset: number): number =>
+	((num >> offset) & (((1 << length) >>> 0) - 1)) >>> 0;
 
-export const setBitRange = (num: number, length: number, offset: number, value: number): number => {
-	return num | (value << offset);
-};
+export const setBitRange = (num: number, length: number, offset: number, value: number): number =>
+	(num | ((value << offset) >>> 0)) >>> 0;
 
 export const strFixLength = (str: string, len: number, posAtStart = false, glue = ' ') => {
 	const space = Array(len > str.length ? len - str.length + 1 : 0).join(glue);

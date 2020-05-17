@@ -85,10 +85,10 @@ export class PinLocation {
 			if (!PinLocationValMapChassis[chassis]) {
 				throw PinLocation.errInvalidValue;
 			}
-			position = getBitRange(value as number, 4, 0);
-			if (!PinLocationValMapPosition[chassis][position]) {
-				throw PinLocation.errInvalidValue;
-			}
+			// position = getBitRange(value as number, 4, 0);
+			// if (!PinLocationValMapPosition[chassis][position]) {
+			// 	throw PinLocation.errInvalidValue;
+			// }
 		} else if (value?.length === 2 && typeof value[0] === 'symbol' && typeof value[1] === 'symbol') {
 			chassis = PinLocationValMapChassis.indexOf(value[0] as symbol);
 			if (chassis === -1) throw PinLocation.errInvalidValue;
